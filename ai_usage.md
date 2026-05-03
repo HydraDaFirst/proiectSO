@@ -14,7 +14,7 @@ Initial, AI-ul a incercat sa foloseasca operatorii > si < direct pe string-uri. 
 
 
 
-Am inteles cum functioneaza seturile de caractere în sscanf (formatul %\[^:]) pentru a parsa string-uri complexe.
+Am inteles cum functioneaza seturile de caractere în sscanf pentru a parsa string-uri complexe.
 
 Am intels importanta conversiei datelor dintr-un argument din linia de comanda, in tipul de date necesar.
 

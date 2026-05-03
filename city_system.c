@@ -1,3 +1,129 @@
+Hydra
+hydradamane
+Online
+
+Hydra — 4/21/2026 12:16 AM
+-----------------
+```
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <sys/stat.h>
+
+message.txt
+3 KB
+Hydra — 4/21/2026 11:10 PM
+```
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <sys/stat.h>
+
+message.txt
+3 KB
+Hydra — 4/24/2026 10:10 PM
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+message.txt
+8 KB
+Hydra — 4/25/2026 2:54 PM
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+message.txt
+10 KB
+Hydra — 4/25/2026 5:58 PM
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+message.txt
+13 KB
+Hydra — 4/26/2026 3:18 PM
+wda
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+message.txt
+16 KB
+Hydra — Yesterday at 3:19 PM
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+message.txt
+18 KB
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <signal.h>
+volatile sig_atomic_t ruleaza = 1;
+void handle_signal(int sig){
+    if(sig == SIGUSR1){
+        char *buf = "Un raport nou a fost adaugat!\n";
+        write(STDOUT_FILENO, buf, strlen(buf));
+    }
+    else if(sig == SIGINT){
+        char *buf = "Semnalul de oprire a fost primit. Monitorul se inchide.\n";
+        write(STDOUT_FILENO, buf, strlen(buf));
+        ruleaza = 0;
+    }
+}
+int main(){
+    pid_t pid = getpid();
+
+    int f = open(".monitor_pid", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if(f < 0){
+        perror(NULL);
+        exit(-1);
+    }
+    char pid_string[20];
+    sprintf(pid_string, "%d", pid);
+    write(f, pid_string, strlen(pid_string));
+    close(f);
+    printf("Monitor pornit cu ID-ul %d\n", pid);
+
+    struct sigaction sa;
+    sa.sa_handler = handle_signal;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+
+    sigaction(SIGUSR1, &sa, NULL);
+    sigaction(SIGINT, &sa, NULL);
+
+    while(ruleaza){
+        pause();
+    }
+    if(unlink(".monitor_pid") == 0){
+        printf("Monitor sters cu succes!\n");
+    }
+    else printf("Eroare la stergerea monitorului!\n");
+    return 0;
+}
+﻿
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,6 +133,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <ctype.h>
+#include <sys/wait.h>
 #define MAX_PATH 250
 #define string_size 300
 typedef struct report{
@@ -38,6 +165,18 @@ void ensure_file(const char *path, mode_t permisiuni){
 int has_permission(const char *path, const char *role, mode_t manager_bits, mode_t inspector_bits){
     struct stat st;
     if(stat(path, &st) == -1){
+        perror(NULL);
+        exit(-1);
+    }
+    if(strcmp(role, "manager") == 0)
+        return (st.st_mode & manager_bits);
+    if(strcmp(role, "inspector") == 0)
+        return (st.st_mode & inspector_bits);
+    return 0;
+}
+int has_permission_district(const char *district, const char *role, mode_t manager_bits, mode_t inspector_bits){
+    struct stat st;
+    if(stat(district, &st) == -1){
         perror(NULL);
         exit(-1);
     }
@@ -354,8 +493,6 @@ void update_threshold(const char *district, const char *role, int new_severity_t
     printf("Treshold updatat cu succes!\n");
 }
 int parse_condition(const char *input, char *field, char *op, char *value) {
-    // Folosim sscanf pentru a extrage cele 3 parti separate de ':'
-    // [cite: 69]
     if (sscanf(input, "%[^:]:%[^:]:%s", field, op, value) == 3) {
         return 1;
     }
@@ -366,7 +503,6 @@ int match_condition(report *r, const char *field, const char *op, const char *va
     double target_val = 0;
     int is_string_comp = 0;
 
-    // Identificam campul si convertim valoarea la tipul corect [cite: 99]
     if (strcmp(field, "severity") == 0) {
         report_val = r->severity_Level;
         target_val = atoi(value);
@@ -426,6 +562,25 @@ void filter_reports(const char *district, const char *role, int argc, char *argv
     }
     close(f);
 }
+void remove_district(const char *district, const char *role){
+    if(has_permission_district(district, role, S_IXUSR, 0) == 0){
+        printf("Eroare! Doar managerul poate sterge un district.\n");
+        return;
+    }
+    char symlink_name[250];
+    strcpy(symlink_name, "");
+    strcat(symlink_name, "active_reports-");
+    strcat(symlink_name, district);
+    char s = fork();
+    if(s == 0){
+        execlp("rm", "rm", "-rf", district, NULL);
+    }
+    if(s != 0){
+        waitpid(s, NULL, 0);
+        unlink(symlink_name);
+    }
+    printf("District sters cu succes!\n");
+}
 int main(int argc, char *argv[]){
     char *role = NULL;
     char *user = NULL;
@@ -461,6 +616,27 @@ int main(int argc, char *argv[]){
         add(district, user, role);
         symlinks(district);
         log_write(district, role, user, "add\n");
+
+        int f = open(".monitor_pid", O_RDONLY);
+        int sig_sent_succ = 0;
+        if(f < 0){
+            log_write(district, role, user, "monitorul nu a putut fi apelat.\n");
+        }
+        else{
+            char buf[20];
+            int bytes = read(f, buf, sizeof(buf) - 1);
+            if(bytes > 0){
+                buf[bytes] = '\0';
+                pid_t pid = atoi(buf);
+
+                if(kill(pid, SIGUSR1) == 0)
+                    sig_sent_succ = 1;
+            }
+        }
+        close(f);
+        if(sig_sent_succ == 1)
+            log_write(district, role, user, "monitor notificat cu succes!\n");
+        else log_write(district, role, user, "monitorul nu a putut fi notificat.\n");
     }
     else if(strcmp(command, "--list") == 0){
         list(district, role);
@@ -500,13 +676,15 @@ int main(int argc, char *argv[]){
                 break;
             }
         }
-
         if(prima_conditie < argc) {
             filter_reports(district, role, argc, argv, prima_conditie);
             log_write(district, role, user, "filter");
         } else {
             printf("Eroare! Nu ați specificat nicio condiție pentru filtru.\n");
         }
+    }
+    else if(strcmp(command, "--remove_district") == 0){
+        remove_district(district, role);
     }
     return 0;
 }
