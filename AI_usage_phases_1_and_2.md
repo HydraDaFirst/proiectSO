@@ -1,3 +1,5 @@
+Phase 1 :
+
 Am folosit Gemnini ca si AI ajutator.
 
 
@@ -17,4 +19,14 @@ Initial, AI-ul a incercat sa foloseasca operatorii > si < direct pe string-uri. 
 Am inteles cum functioneaza seturile de caractere în sscanf pentru a parsa string-uri complexe.
 
 Am intels importanta conversiei datelor dintr-un argument din linia de comanda, in tipul de date necesar.
+
+
+
+Phase 2 :
+
+Am folosit Gemini ca si AI ajutator.
+
+
+
+Am folosit AI-ul pentru a ma ajuta sa inteleg mai bine cum functioneaza semnalele. Am inteles scopul si folosirea variabilei de tip volatile sig\_atomic\_t, a structului sigaction, dar si a functiilor pause() si getpid(). Totodata acesta m-a ajutat la intelegerea functiei kill().
 
