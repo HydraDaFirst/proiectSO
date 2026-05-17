@@ -19,6 +19,19 @@ void handle_signal(int sig){
 int main(){
     pid_t pid = getpid();
 
+    int fd = open(".monitor_pid", O_RDONLY, 0644);
+    if(fd >= 0){
+        char buf[20];
+        int bytes = read(fd, buf, sizeof(buf) - 1);
+        if(bytes > 0){
+            buf[bytes] = '\0';
+            pid_t pid_existent = atoi(buf);
+        printf("Monitorul cu pid ul %d deja exista\n", pid_existent);
+        fflush(stdout);
+        close(fd);
+        return 1;
+        }
+    }
     int f = open(".monitor_pid", O_WRONLY | O_CREAT | O_TRUNC, 0644);
     if(f < 0){
         perror(NULL);
@@ -29,6 +42,7 @@ int main(){
     write(f, pid_string, strlen(pid_string));
     close(f);
     printf("Monitor pornit cu ID-ul %d\n", pid);
+    fflush(stdout);
 
     struct sigaction sa;
     sa.sa_handler = handle_signal;
