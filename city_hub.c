@@ -27,7 +27,10 @@ void start_monitor(){
                 int n = read(fd[0], buf, sizeof(buf) - 1);
                 if(n > 0){
                     buf[n] = '\0';
-                    printf("HUB MSG : %s", buf);
+                    if(strncmp(buf, "ERR", 3) == 0)
+                        printf("HUB MSG ERR : %s", buf);
+                    else if(strncmp(buf, "INF", 3) == 0)
+                        printf("HUB MSG INF :  %s", buf);
                     fflush(stdout);
                 }
                 else if(n == 0){

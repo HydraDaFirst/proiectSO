@@ -4,14 +4,19 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <signal.h>
+char err[] = "ERR";
+char inf[] = "INF";
 volatile sig_atomic_t ruleaza = 1;
 void handle_signal(int sig){
+    char buf[256];
     if(sig == SIGUSR1){
-        char *buf = "Un raport nou a fost adaugat!\n";
+        strcpy(buf, inf);
+        strcat(buf, " Un raport nou a fost adaugat!\n");
         write(STDOUT_FILENO, buf, strlen(buf));
     }
     else if(sig == SIGINT){
-        char *buf = "Semnalul de oprire a fost primit. Monitorul se inchide.\n";
+        strcpy(buf, inf);
+        strcat(buf, " Semnalul de oprire a fost primit. Monitorul se inchide.\n");
         write(STDOUT_FILENO, buf, strlen(buf));
         ruleaza = 0;
     }
@@ -26,7 +31,7 @@ int main(){
         if(bytes > 0){
             buf[bytes] = '\0';
             pid_t pid_existent = atoi(buf);
-        printf("Monitorul cu pid ul %d deja exista\n", pid_existent);
+        printf("%s Monitorul cu pid ul %d deja exista\n", err, pid_existent);
         fflush(stdout);
         close(fd);
         return 1;
@@ -41,7 +46,7 @@ int main(){
     sprintf(pid_string, "%d", pid);
     write(f, pid_string, strlen(pid_string));
     close(f);
-    printf("Monitor pornit cu ID-ul %d\n", pid);
+    printf("%s Monitor pornit cu ID-ul %d\n", inf, pid);
     fflush(stdout);
 
     struct sigaction sa;
@@ -56,8 +61,8 @@ int main(){
         pause();
     }
     if(unlink(".monitor_pid") == 0){
-        printf("Monitor sters cu succes!\n");
+        printf("%s Monitor sters cu succes!\n", inf);
     }
-    else printf("Eroare la stergerea monitorului!\n");
+    else printf("%s Eroare la stergerea monitorului!\n", err);
     return 0;
 }

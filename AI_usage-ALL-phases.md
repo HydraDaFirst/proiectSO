@@ -30,3 +30,15 @@ Am folosit Gemini ca si AI ajutator.
 
 Am folosit AI-ul pentru a ma ajuta sa inteleg mai bine cum functioneaza semnalele. Am inteles scopul si folosirea variabilei de tip volatile sig\_atomic\_t, a structului sigaction, dar si a functiilor pause() si getpid(). Totodata acesta m-a ajutat la intelegerea functiei kill().
 
+
+
+Phase 3 :
+
+Am folosit Gemini ca si AI ajutator.
+
+
+
+Am folosit AI-ul pentru a ma ajuta la intelegerea si aprofundarea functiei fork(). Totodata acesta m-a ajutat la intelegerea folosirii folosirii pipe-urilor, dar si a functiilor execlp() si dup2().
+
+
+
