@@ -38,7 +38,5 @@ Am folosit Gemini ca si AI ajutator.
 
 
 
-Am folosit AI-ul pentru a ma ajuta la intelegerea si aprofundarea functiei fork(). Totodata acesta m-a ajutat la intelegerea folosirii folosirii pipe-urilor, dar si a functiilor execlp() si dup2().
-
-
+Am folosit AI-ul pentru a ma ajuta la intelegerea si aprofundarea functiei fork(). Totodata acesta m-a ajutat la intelegerea folosirii folosirii pipe-urilor, dar si a functiilor execlp() si dup2()..
 
